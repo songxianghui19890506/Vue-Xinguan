@@ -1,5 +1,5 @@
 <template>
-  <div id="users" >
+  <div id="users">
     <el-breadcrumb separator="/" style="padding-left:10px;padding-bottom:10px;font-size:12px;">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>系统管理</el-breadcrumb-item>
@@ -10,12 +10,24 @@
       <el-form :inline="true" ref="form" :model="queryMap" label-width="70px">
         <el-form-item label="用户名">
           <el-input
-           style="width:180px;"
+            style="width:180px;"
             @clear="searchUser"
             clearable
             v-model="queryMap.username"
             placeholder="请输入用户名查询"
           ></el-input>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-select
+            style="width:150px;"
+            clearable
+            v-model="queryMap.sex"
+            @clear="searchUser"
+            placeholder="请选择性别查询"
+          >
+            <el-option label="男" value="1"></el-option>
+            <el-option label="女" value="0"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input
@@ -26,7 +38,18 @@
             placeholder="请输入邮箱查询"
           ></el-input>
         </el-form-item>
-        <el-form-item label="昵称">
+        <el-form-item label="部门">
+          <el-select  clearable
+            @clear="searchUser" v-model="queryMap.departmentId" placeholder="请选择所属部门">
+            <el-option
+              v-for="department in departments"
+              :key="department.id"
+              :label="department.name"
+              :value="department.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <!-- <el-form-item label="昵称">
           <el-input
             style="width:150px;"
             clearable
@@ -34,13 +57,8 @@
             v-model="queryMap.nickname"
             placeholder="请输入昵称查询"
           ></el-input>
-        </el-form-item>
-        <el-form-item label="性别">
-          <el-select  style="width:150px;" clearable v-model="queryMap.sex" @clear="searchUser" placeholder="请选择性别查询">
-            <el-option label="男" value="1"></el-option>
-            <el-option label="女" value="0"></el-option>
-          </el-select>
-        </el-form-item>
+        </el-form-item>-->
+        
 
         <el-form-item>
           <el-button plain type="primary" @click="searchUser" icon="el-icon-search">查询</el-button>
@@ -52,14 +70,19 @@
           >添加</el-button>
         </el-form-item>
       </el-form>
-    
+
       <!-- 表格区域 -->
-      <el-table  v-loading="loading" :data="userList" border style="width: 100%;" height="457">
+      <el-table v-loading="loading" :data="userList" border style="width: 100%;" height="457">
         <!-- <el-table-column type="selection" width="40"></el-table-column> -->
         <el-table-column label="#" prop="id" width="50"></el-table-column>
         <el-table-column prop="username" label="用户名" width="110"></el-table-column>
-        <el-table-column prop="sex" :formatter="showSex" label="性别" width="60"></el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="200" sortable></el-table-column>
+        <el-table-column prop="sex" :formatter="showSex" label="性别" width="80">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.sex==1">帅哥</el-tag>
+            <el-tag type="danger" v-else>美女</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="departmentName" label="所属部门" width="180" sortable></el-table-column>
         <el-table-column prop="birth" label="生日" width="180" sortable></el-table-column>
         <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
         <el-table-column prop="phoneNumber" label="电话" width="150"></el-table-column>
@@ -73,13 +96,19 @@
             <el-button type="primary" size="mini" icon="el-icon-edit" @click="edit(scope.row.id)"></el-button>
 
             <el-button type="danger" size="mini" icon="el-icon-delete" @click="del(scope.row.id)"></el-button>
-            <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-            <el-button
-              type="warning"
-              size="mini"
-              icon="el-icon-s-tools"
-              @click="assignRoles(scope.row.id)"
-            ></el-button>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="分配角色"
+              placement="top"
+              :enterable="false"
+            >
+              <el-button
+                type="warning"
+                size="mini"
+                icon="el-icon-s-tools"
+                @click="assignRoles(scope.row.id)"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -92,7 +121,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryMap.pageNo"
-        :page-sizes="[7, 20, 30, 40]"
+        :page-sizes="[6, 20, 30, 40]"
         :page-size="queryMap.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -106,25 +135,62 @@
             :model="addForm"
             :label-position="labelPosition"
             :rules="addFormRules"
-            size="mini"
             ref="addFormRef"
+            label-width="80px"
           >
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="addForm.username"></el-input>
-            </el-form-item>
-            <el-form-item label="昵称" prop="nickname">
-              <el-input v-model="addForm.nickname"></el-input>
-            </el-form-item>
+            <el-row>
+              <el-col :span="10">
+                <div class="grid-content bg-purple">
+                  <el-form-item label="用户名" prop="username">
+                    <el-input v-model="addForm.username"></el-input>
+                  </el-form-item>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="grid-content bg-purple-light">
+                  <el-form-item label="部门" prop="departmentId">
+                    <el-select v-model="addForm.departmentId" placeholder="请选择所属部门">
+                      <el-option
+                        v-for="department in departments"
+                        :key="department.id"
+                        :label="department.name"
+                        :value="department.id"
+                      ></el-option>
+                    </el-select>
+                  </el-form-item>
+                </div>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="10">
+                <div class="grid-content bg-purple">
+                  <el-form-item label="昵称" prop="nickname">
+                    <el-input v-model="addForm.nickname"></el-input>
+                  </el-form-item>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="grid-content bg-purple-light">
+                  <el-form-item label="性别" prop="sex">
+                    <el-radio-group v-model="addForm.sex">
+                      <el-radio :label="1">帅哥</el-radio>
+                      <el-radio :label="0">美女</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                </div>
+              </el-col>
+            </el-row>
+
             <el-form-item label="密码" prop="password">
               <el-input v-model="addForm.password"></el-input>
             </el-form-item>
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="addForm.email"></el-input>
             </el-form-item>
-            <el-form-item label="联系方式" prop="phoneNumber">
+            <el-form-item label="手机" prop="phoneNumber">
               <el-input v-model="addForm.phoneNumber"></el-input>
             </el-form-item>
-            <el-form-item prop="birth">
+            <el-form-item prop="birth"  label="生日">
               <el-col :span="11">
                 <el-date-picker
                   type="date"
@@ -134,12 +200,6 @@
                   style="width: 100%;"
                 ></el-date-picker>
               </el-col>
-            </el-form-item>
-            <el-form-item label="性别">
-              <el-radio-group v-model="addForm.sex">
-                <el-radio :label="1">帅哥</el-radio>
-                <el-radio :label="0">美女</el-radio>
-              </el-radio-group>
             </el-form-item>
           </el-form>
         </span>
@@ -156,23 +216,66 @@
             :model="editForm"
             :label-position="labelPosition"
             :rules="addFormRules"
-            size="mini"
             ref="editFormRef"
+            label-width="80px"
           >
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="editForm.username" :disabled="true"></el-input>
-              <el-input type="hidden" v-model="editForm.id" :disabled="true" style="display:none;"></el-input>
-            </el-form-item>
-            <el-form-item label="昵称" prop="nickname">
-              <el-input v-model="editForm.nickname"></el-input>
-            </el-form-item>
+            <el-row>
+              <el-col :span="10">
+                <div class="grid-content bg-purple">
+                  <el-form-item label="用户名" prop="username">
+                    <el-input v-model="editForm.username" :disabled="true"></el-input>
+                    <el-input
+                      type="hidden"
+                      v-model="editForm.id"
+                      :disabled="true"
+                      style="display:none;"
+                    ></el-input>
+                  </el-form-item>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="grid-content bg-purple-light">
+                  <el-form-item label="部门" prop="departmentId">
+                    <el-select v-model="editForm.departmentId" placeholder="请选择所属部门">
+                      <el-option
+                        v-for="department in departments"
+                        :key="department.id"
+                        :label="department.name"
+                        :value="department.id"
+                      ></el-option>
+                    </el-select>
+                  </el-form-item>
+                </div>
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="10">
+                <div class="grid-content bg-purple">
+                  <el-form-item label="昵称" prop="nickname">
+                    <el-input v-model="editForm.nickname"></el-input>
+                  </el-form-item>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="grid-content bg-purple-light">
+                  <el-form-item label="性别" prop="sex">
+                    <el-radio-group v-model="editForm.sex">
+                      <el-radio :label="1">帅哥</el-radio>
+                      <el-radio :label="0">美女</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                </div>
+              </el-col>
+            </el-row>
+
             <el-form-item label="邮箱" prop="email">
               <el-input v-model="editForm.email"></el-input>
             </el-form-item>
             <el-form-item label="联系方式" prop="phoneNumber">
               <el-input v-model="editForm.phoneNumber"></el-input>
             </el-form-item>
-            <el-form-item prop="birth">
+            <el-form-item prop="birth" label="生日">
               <el-col :span="11">
                 <el-date-picker
                   type="date"
@@ -182,12 +285,6 @@
                   style="width: 100%;"
                 ></el-date-picker>
               </el-col>
-            </el-form-item>
-            <el-form-item label="性别" prop="sex">
-              <el-radio-group v-model="editForm.sex">
-                <el-radio :label="1">帅哥</el-radio>
-                <el-radio :label="0">美女</el-radio>
-              </el-radio-group>
             </el-form-item>
           </el-form>
         </span>
@@ -254,14 +351,21 @@ export default {
       }, 100);
     };
     return {
-      loading:true,
+      departments: [],
+      loading: true,
       total: 0,
       addDialogVisible: false, //添加对话框,
       editDialogVisible: false, //修改对话框
       assignDialogVisible: false, //分配角色对话框
       labelPosition: "right", //lable对齐方式
       //查询对象
-      queryMap: { pageNum: 1, pageSize: 7, username: "", sex: '',nickname:'', },
+      queryMap: {
+        pageNum: 1,
+        pageSize: 6,
+        username: "",
+        sex: "",
+        nickname: ""
+      },
       userList: [],
 
       addForm: {
@@ -283,6 +387,10 @@ export default {
           { required: true, message: "请输入密码", trigger: "blur" },
           { min: 3, max: 12, message: "长度在 3 到 12 个字符", trigger: "blur" }
         ],
+        departmentId: [
+          { required: true, message: "请选择部门", trigger: "blur" }
+        ],
+        sex: [{ required: true, message: "请选择性别", trigger: "blur" }],
         birth: [{ required: true, message: "请填写出生日期", trigger: "blur" }],
         email: [{ required: true, validator: checkEmail, trigger: "blur" }],
         sex: [{ required: true, message: "请填写用户性别", trigger: "blur" }],
@@ -307,12 +415,23 @@ export default {
   methods: {
     //弹出用户分配角色
     async assignRoles(id) {
-      this.assignDialogVisible = true;
+      const loading = this.$loading({
+        lock: true,
+        text: "Loading",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
+
       const { data: res } = await this.$http.get("user/" + id + "/roles");
       if (res.code == 200) {
         this.roles = res.data.roles;
         this.value = res.data.values;
         this.uid = id;
+
+        setTimeout(() => {
+          loading.close();
+          this.assignDialogVisible = true;
+        }, 400);
       }
     },
     //确定分配角色
@@ -458,12 +577,24 @@ export default {
       } else {
         this.$message.success("更新用户状态成功");
       }
+    },
+    /**
+     * 加载所有部门
+     */
+    async getDepartmets() {
+      const { data: res } = await this.$http.get("department/findAll");
+      if (res.code !== 200) return this.$message.error("获取部门列表失败");
+      this.departments = res.data;
+    },
+    showSex(row, column) {
+      return row.sex == 1 ? "帅哥" : "美女";
     }
   },
   created() {
     this.getUserList();
+    this.getDepartmets();
     setTimeout(() => {
-          this.loading = false;
+      this.loading = false;
     }, 500);
   }
 };

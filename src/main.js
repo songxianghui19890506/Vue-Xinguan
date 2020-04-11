@@ -16,7 +16,7 @@ Vue.use(echarts)
 NProgress.configure({ease:'ease',speed:500});
 NProgress.configure({minimum:0.3});
 Vue.prototype.$http = axios
-axios.defaults.baseURL='http://www.zykhome.club:8081/'
+axios.defaults.baseURL='http://127.0.0.1:8081/'
 axios.interceptors.request.use(config => {
     NProgress.start() // 设置加载进度条(开始..)
     config.headers.Authorization = window.sessionStorage.getItem('JWT_TOKEN');
@@ -31,9 +31,9 @@ axios.interceptors.response.use(
   function(response) {
     NProgress.done() // 设置加载进度条(结束..)
     if(response.data.code==4001){
-      window.location.href="/login";
       window.sessionStorage.clear();
       alert(response.data.msg);
+      router.push("/login")
     }
     return response;
   },

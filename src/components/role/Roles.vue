@@ -32,7 +32,13 @@
       </el-row>
       <!-- 表格区域 -->
       <template>
-        <el-table  v-loading="loading" :data="roleData" border style="width: 100%;margin-top:20px;" height="460">
+        <el-table
+          v-loading="loading"
+          :data="roleData"
+          border
+          style="width: 100%;margin-top:20px;"
+          height="460"
+        >
           <el-table-column prop="id" label="ID" width="180"></el-table-column>
           <el-table-column prop="roleName" label="角色名" width="180"></el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="150"></el-table-column>
@@ -44,9 +50,19 @@
           <el-table-column prop="remark" label="备注"></el-table-column>
           <el-table-column fixed="right" label="操作" width="200">
             <template slot-scope="scope">
-              <el-button @click="grant(scope.row.id)" type="text" icon="el-icon-present" size="small">授权</el-button>
+              <el-button
+                @click="grant(scope.row.id)"
+                type="text"
+                icon="el-icon-present"
+                size="small"
+              >授权</el-button>
               <el-button @click="edit(scope.row.id)" type="text" icon="el-icon-edit" size="small">编辑</el-button>
-              <el-button @click="del(scope.row.id)" type="text" icon="el-icon-delete" size="small">删除</el-button>
+              <el-button
+                @click="del(scope.row.id)"
+                type="text"
+                icon="el-icon-delete"
+                size="small"
+              >删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -75,7 +91,12 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addRole">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="addRole"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >确 定</el-button>
         </span>
       </el-dialog>
       <!-- 编辑弹框 -->
@@ -90,15 +111,19 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="updateRole">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="updateRole"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >确 定</el-button>
         </span>
       </el-dialog>
       <!-- 角色授权弹出框 -->
-      <el-dialog title="分配菜单权限"   :visible.sync="grantDialogVisible" width="38%" >
+      <el-dialog title="分配菜单权限" :visible.sync="grantDialogVisible" width="38%">
         <span>
           <el-tree
-         
-             :auto-expand-parent="false"
+            :auto-expand-parent="false"
             :data="data"
             show-checkbox
             node-key="id"
@@ -110,8 +135,14 @@
           <!-- check-strictly -->
         </span>
         <span slot="footer" class="dialog-footer">
-          <el-button  @click="grantDialogVisible = false">取 消</el-button>
-          <el-button type="primary" icon="el-icon-setting" @click="authority">授 权</el-button>
+          <el-button @click="grantDialogVisible = false">取 消</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-setting"
+            @click="authority"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >授 权</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -122,7 +153,9 @@
 export default {
   data() {
     return {
-      loading:true,
+      btnLoading: false,
+      btnDisabled: false,
+      loading: true,
       total: 0,
       queryMap: { roleName: "", pageNum: 1, pageSize: 7 }, //查询条件
       roleData: [], //角色表格数据
@@ -153,19 +186,22 @@ export default {
   methods: {
     //获取选中的节点
     async authority() {
+      this.btnDisabled = true;
+      this.btnLoading = true;
       const { data: res } = await this.$http.post(
         "role/authority/" + this.grantId,
         [].concat(
           this.$refs.tree.getCheckedKeys(),
           this.$refs.tree.getHalfCheckedKeys()
         )
-
       );
       if (res.code == 200) {
         this.$message.success("角色授权成功");
       } else {
-         this.$message.error("角色授权失败:"+res.msg);
+        this.$message.error("角色授权失败:" + res.msg);
       }
+      this.btnDisabled = false;
+      this.btnLoading = false;
       this.grantDialogVisible = false;
     },
 
@@ -174,7 +210,7 @@ export default {
       //加载所有菜单以及用户拥有的菜单权限id
       const { data: res } = await this.$http.get("role/findRoleMenu/" + id);
       if (res.code == 200) {
-         //默认选中的树的数据
+        //默认选中的树的数据
         let that = this;
         setTimeout(function() {
           res.data.mids.forEach(value => {
@@ -185,7 +221,6 @@ export default {
         this.open = res.data.open;
         this.grantId = id; //需要授权的id
       }
-      console.log(this.mids);
       this.grantDialogVisible = true;
     },
     //加载用户列表
@@ -218,14 +253,18 @@ export default {
         if (!valid) {
           return;
         } else {
+          this.btnDisabled = true;
+          this.btnLoading = true;
           const { data: res } = await this.$http.post("role/add", this.addForm);
           if (res.code == 200) {
             this.$message.success("添加成功");
             this.addDialogVisible = false;
+            this.btnDisabled = false;
+            this.btnLoading = false;
             this.addForm = {};
             this.getRoleList();
           } else {
-            return this.$message.error("角色添加失败:"+res.msg);
+            return this.$message.error("角色添加失败:" + res.msg);
           }
         }
       });
@@ -237,7 +276,7 @@ export default {
         this.editForm = res.data;
         this.editDialogVisible = true;
       } else {
-        return this.$message.error("角色编辑失败:"+res.msg);
+        return this.$message.error("角色编辑失败:" + res.msg);
       }
     },
     //更新用户
@@ -246,7 +285,9 @@ export default {
         if (!valid) {
           return;
         } else {
-          const { data: res } = await this.$http.post(
+          this.btnDisabled = true;
+          this.btnLoading = true;
+          const { data: res } = await this.$http.put(
             "role/update/" + this.editForm.id,
             this.editForm
           );
@@ -257,10 +298,12 @@ export default {
               type: "success"
             });
             this.editDialogVisible = false;
+            this.btnDisabled = false;
+            this.btnLoading = false;
             this.editForm = {};
             this.getRoleList();
           } else {
-            return this.$message.error("角色信息更新失败:"+res.msg);
+            return this.$message.error("角色信息更新失败:" + res.msg);
           }
         }
       });
@@ -288,7 +331,7 @@ export default {
           this.$message.success("删除成功");
           this.getRoleList();
         } else {
-          this.$message.error("删除失败:"+res.msg);
+          this.$message.error("删除失败:" + res.msg);
         }
       }
     },
@@ -318,7 +361,7 @@ export default {
   created() {
     this.getRoleList();
     setTimeout(() => {
-       this.loading=false;
+      this.loading = false;
     }, 500);
   }
 };

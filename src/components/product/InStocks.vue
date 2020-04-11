@@ -10,20 +10,37 @@
     <el-card>
       <!-- 搜索部分 -->
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :span="4">
+          <el-select @change="search" clearable  @clear="search" v-model="queryMap.type" placeholder="请选择入库类型">
+          <el-option label="捐赠" value="1"></el-option>
+          <el-option label="下拨" value="2"></el-option>
+          <el-option label="采购" value="3"></el-option>
+          <el-option label="借用" value="4"></el-option>
+        </el-select>
+        </el-col>
+
+        <el-col :span="5">
+      
           <el-input
             clearable
-            v-model="queryMap.name"
+            @clear="search"
+            v-model="queryMap.inNum"
             placeholder="请输入入库单查询"
+             @keyup.enter.native="search"
             class="input-with-select"
           >
-            <el-button slot="append" icon="el-icon-search"></el-button>
           </el-input>
         </el-col>
-        <el-col :span="8">
+          <el-col :span="3">
+            <el-button type="primary" icon="el-icon-search" @click="search">查询</el-button>
+ </el-col>
+        <el-col :span="3">
           <router-link to="/inStocks/addStocks">
             <el-button type="success" plain icon="el-icon-circle-plus-outline">添加入库</el-button>
           </router-link>
+        </el-col>
+        <el-col :span="2">
+         <el-button type="button">导出表格<i class="el-icon-download el-icon--right"></i></el-button>
         </el-col>
       </el-row>
       <!-- 表格区域 -->
@@ -152,6 +169,13 @@ export default {
      */
     handleSizeChange(newSize) {
       this.queryMap.pageSize = newSize;
+      this.loadTableData();
+    },
+    /**
+     * 查询入库单
+     */
+    search(){
+      this.queryMap.pageNum=1;
       this.loadTableData();
     },
     /**

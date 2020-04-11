@@ -9,7 +9,7 @@
     <el-card class="box-card">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-button type="warning" plain icon="el-icon-circle-plus-outline" @click="openAdd">添加</el-button>
+          <el-button type="warning"  icon="el-icon-circle-plus-outline" @click="openAdd">添加</el-button>
         </el-col>
       </el-row>
       <!-- 表格部分 -->
@@ -181,7 +181,7 @@ export default {
         if (!valid) {
           return;
         } else {
-          const { data: res } = await this.$http.post(
+          const { data: res } = await this.$http.put(
             "productCategory/update/" + this.editRuleForm.id,
             this.editRuleForm
           );

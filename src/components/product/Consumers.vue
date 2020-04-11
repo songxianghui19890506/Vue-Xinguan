@@ -4,7 +4,7 @@
     <el-breadcrumb separator="/" style="padding-left:10px;padding-bottom:10px;font-size:12px;">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>物资流向</el-breadcrumb-item>
-      <el-breadcrumb-item>物资来源</el-breadcrumb-item>
+      <el-breadcrumb-item>物资去处</el-breadcrumb-item>
     </el-breadcrumb>
     <!-- 右侧卡片区域 -->
     <!-- 用户列表卡片区 -->
@@ -14,7 +14,7 @@
           <el-input
             clearable
             v-model="queryMap.name"
-            placeholder="请输入供应商查询"
+            placeholder="请输入物资去处查询"
             @clear="search"
             class="input-with-select"
           >
@@ -36,14 +36,13 @@
           border
           v-loading="loading"
           stripe
-          :data="supplierData"
+          :data="consumerData"
           style="width: 100%;margin-top:20px;"
           height="460"
         >
           <el-table-column prop="id" type="index" label="ID" width="50"></el-table-column>
           <el-table-column prop="name" label="物资提供方" width="120"></el-table-column>
           <el-table-column prop="createTime" label="创建时间"></el-table-column>
-          <el-table-column prop="email" label="邮箱"></el-table-column>
           <el-table-column prop="address" label="地址"></el-table-column>
           <el-table-column prop="phone" label="电话"></el-table-column>
           <el-table-column prop="sort" label="排序"></el-table-column>
@@ -95,9 +94,7 @@
             <el-form-item label="地址" prop="address">
               <el-input v-model="addRuleForm.address"></el-input>
             </el-form-item>
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="addRuleForm.email"></el-input>
-            </el-form-item>
+           
             <el-form-item label="电话" prop="phone">
               <el-input v-model="addRuleForm.phone"></el-input>
             </el-form-item>
@@ -135,9 +132,7 @@
               <el-input v-model="editRuleForm.address"></el-input>
             </el-form-item>
 
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="editRuleForm.email"></el-input>
-            </el-form-item>
+         
 
             <el-form-item label="电话" prop="phone">
               <el-input v-model="editRuleForm.phone"></el-input>
@@ -160,19 +155,6 @@
 <script>
 export default {
   data() {
-    var checkEmail = (rule, value, callback) => {
-      const mailReg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
-      if (!value) {
-        return callback(new Error("邮箱不能为空"));
-      }
-      setTimeout(() => {
-        if (mailReg.test(value)) {
-          callback();
-        } else {
-          callback(new Error("请输入正确的邮箱格式"));
-        }
-      }, 100);
-    };
     var checkPhone = (rule, value, callback) => {
       const phoneReg = /^1[34578]\d{9}$$/;
       if (!value) {
@@ -198,7 +180,7 @@ export default {
       editDialogVisible: false,
       addDialogVisible: false, //添加弹框是否显示
       total: 0, //总共多少条数据
-      supplierData: [], //表格数据
+      consumerData: [], //表格数据
       queryMap: { pageNum: 1, pageSize: 7, name: "" }, //查询对象
       addRuleForm: {}, //添加表单数据
       editRuleForm: {}, //修改表单数据
@@ -212,8 +194,10 @@ export default {
           { required: true, message: "请输入地址信息", trigger: "blur" },
           { min: 2, max: 12, message: "长度在 2 到 12 个字符", trigger: "blur" }
         ],
-        email: [{ required: true, validator: checkEmail, trigger: "blur" }],
-
+        sort: [
+          { required: true, message: "请输入排序号", trigger: "blur" },
+        ],
+    
         phone: [
           {
             required: true,
@@ -229,7 +213,7 @@ export default {
     //搜索
     search() {
       this.queryMap.pageNum = 1;
-      this.getSupplierList();
+      this.getConsumerList();
     },
     //删除类别
     async del(id) {
@@ -248,10 +232,10 @@ export default {
         });
       });
       if (res == "confirm") {
-        const { data: res } = await this.$http.delete("supplier/delete/" + id);
+        const { data: res } = await this.$http.delete("consumer/delete/" + id);
         if (res.code == 200) {
           this.$message.success("类别删除成功");
-          this.getSupplierList();
+          this.getConsumerList();
         } else {
           this.$message.error(res.msg);
         }
@@ -264,19 +248,19 @@ export default {
           return;
         } else {
           const { data: res } = await this.$http.put(
-            "supplier/update/" + this.editRuleForm.id,
+            "consumer/update/" + this.editRuleForm.id,
             this.editRuleForm
           );
           if (res.code == 200) {
             this.$notify({
               title: "成功",
-              message: "类别信息更新",
+              message: "物资去处更新",
               type: "success"
             });
             this.editRuleForm = {};
-            this.getSupplierList();
+            this.getConsumerList();
           } else {
-            this.$message.error("类别信息更新失败:" + res.msg);
+            this.$message.error("物资去处更新失败:" + res.msg);
           }
 
           this.editDialogVisible = false;
@@ -285,11 +269,11 @@ export default {
     },
     //编辑
     async edit(id) {
-      const { data: res } = await this.$http.get("supplier/edit/" + id);
+      const { data: res } = await this.$http.get("consumer/edit/" + id);
       if (res.code == 200) {
         this.editRuleForm = res.data;
       } else {
-        return this.$message.error("类别信息编辑失败" + res.msg);
+        return this.$message.error("物资去处编辑失败" + res.msg);
       }
       this.editDialogVisible = true;
     },
@@ -300,13 +284,13 @@ export default {
           return;
         } else {
           const { data: res } = await this.$http.post(
-            "supplier/add",
+            "consumer/add",
             this.addRuleForm
           );
           if (res.code == 200) {
             this.$message.success("类别添加成功");
             this.addRuleForm = {};
-            this.getSupplierList();
+            this.getConsumerList();
           } else {
             return this.$message.error("类别添加失败:" + res.msg);
           }
@@ -315,27 +299,27 @@ export default {
       });
     },
     //加载系别列表
-    async getSupplierList() {
-      const { data: res } = await this.$http.get("supplier/findSupplierList", {
+    async getConsumerList() {
+      const { data: res } = await this.$http.get("consumer/findConsumerList", {
         params: this.queryMap
       });
       if (res.code !== 200) {
         return this.$message.error("获取用户列表失败");
       } else {
         this.total = res.data.total;
-        this.supplierData = res.data.rows;
+        this.consumerData = res.data.rows;
       }
     },
 
     //改变页码
     handleSizeChange(newSize) {
       this.queryMap.pageSize = newSize;
-      this.getSupplierList();
+      this.getConsumerList();
     },
     //翻页
     handleCurrentChange(current) {
       this.queryMap.pageNum = current;
-      this.getSupplierList();
+      this.getConsumerList();
     },
     //关闭弹出框
     closeAddDialog() {
@@ -349,7 +333,7 @@ export default {
     }
   },
   created() {
-    this.getSupplierList();
+    this.getConsumerList();
        setTimeout(() => {
           this.loading = false;
     }, 500);

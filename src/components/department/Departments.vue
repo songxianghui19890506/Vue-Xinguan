@@ -23,7 +23,6 @@
         </el-col>
         <el-col :span="8">
           <el-button
-          plain
             type="success"
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
@@ -106,7 +105,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="add">确 定</el-button>
+          <el-button type="primary" @click="add" :disabled="disabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
 
@@ -143,7 +142,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="update">确 定</el-button>
+          <el-button type="primary" @click="update" :disabled="disabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -171,6 +170,8 @@ export default {
       }, 100);
     };
     return {
+      btnLoading:false,
+      btnDisabled:false,
       loading:true,
       editDialogVisible: false,
       addDialogVisible: false, //添加弹框是否显示
@@ -241,7 +242,9 @@ export default {
         if (!valid) {
           return;
         } else {
-          const { data: res } = await this.$http.post(
+          this.btnLoading=true,
+          this.btnDisabled=true;
+          const { data: res } = await this.$http.put(
             "department/update/" + this.editRuleForm.id,
             this.editRuleForm
           );
@@ -253,6 +256,8 @@ export default {
             });
             this.editRuleForm = {};
             this.getDepartmentList();
+            this.btnDisabled=false;
+            this.btnLoading=false;
           } else {
             this.$message.error("部门信息更新失败:" + res.msg);
           }
@@ -277,6 +282,8 @@ export default {
         if (!valid) {
           return;
         } else {
+           this.btnLoading=true,
+          this.btnDisabled=true;
           const { data: res } = await this.$http.post(
             "department/add",
             this.addRuleForm
@@ -289,6 +296,8 @@ export default {
             return this.$message.error("部门添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
+           this.btnLoading=false,
+          this.btnDisabled=false;
         }
       });
     },

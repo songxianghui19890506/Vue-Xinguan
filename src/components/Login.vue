@@ -13,6 +13,7 @@
       <el-form-item prop="username">
         <el-input
           type="text"
+          @keyup.enter.native="handleSubmit"
           v-model="userLoginForm.username"
           auto-complete="off"
           placeholder="用户名"
@@ -21,6 +22,7 @@
       </el-form-item>
       <el-form-item prop="password">
         <el-input
+          @keyup.enter.native="handleSubmit"
           type="password"
           v-model="userLoginForm.password"
           auto-complete="off"
@@ -28,10 +30,15 @@
           prefix-icon="el-icon-suitcase-1"
         ></el-input>
       </el-form-item>
-      <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox>
+    <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
         <div style="float:right;">
-          <el-button type="primary" class="el-icon-thumb" @click="handleSubmit"  :loading="loading">登录</el-button>
+          <el-button
+            type="primary"
+            class="el-icon-thumb"
+            @click="handleSubmit"
+            :loading="loading"
+          >登录</el-button>
           <el-button
             type="primary"
             class="el-icon-refresh"
@@ -48,9 +55,10 @@
 export default {
   data() {
     return {
+      imgCode:undefined,
       //表单用户登入数据
-      loading:false,
-      userLoginForm: { username: "系统测试人员", password: "123456" },
+      loading: false,
+      userLoginForm: { username: "系统测试人员", password: "123456" ,imgCode:'',},
       checked: false,
 
       //验证规则
@@ -67,19 +75,20 @@ export default {
     };
   },
   methods: {
+
     //登入提交
     handleSubmit: function() {
       this.$refs.userLoginFormRef.validate(async valid => {
         if (!valid) {
           return;
         } else {
-            this.loading=true;
+          this.loading = true;
           //发起登入请求
           const { data: res } = await this.$http.post(
             "user/login?username=" +
               this.userLoginForm.username +
               "&password=" +
-              this.userLoginForm.password
+              this.userLoginForm.password+"&imgCode="+this.userLoginForm.imgCode
           );
           console.log(res);
           if (res.code == 200) {
@@ -99,21 +108,26 @@ export default {
               type: "error"
             });
           }
-          this.loading=false;
+          this.loading = false;
         }
       });
     },
     //重置表单
     resetForm: function() {
       this.$refs.userLoginFormRef.resetFields();
-    },
+    }
   },
-  created(){
-       const h = this.$createElement;
-       this.$notify({
-          title: '众志成城抗击疫情',
-          message: h('i', { style: 'color: #303030'}, '欢迎您访问基于RBAC的前后端分离后台权限系统~,Vue,SpringBoot,JWT,Shiro,通用Mapper')
-        });
+  created() {
+    this.changImgCode();
+    const h = this.$createElement;
+    this.$notify({
+      title: "众志成城抗击疫情",
+      message: h(
+        "i",
+        { style: "color: #303030" },
+        "欢迎您访问基于SpringBoot+Vue开发的前后端分离系统，新冠-物资管理系统,Vue,SpringBoot,JWT,Shiro,通用Mapper"
+      )
+    });
   }
 };
 </script>

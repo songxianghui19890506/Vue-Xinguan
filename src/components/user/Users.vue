@@ -8,8 +8,25 @@
     <!-- 用户列表卡片区 -->
     <el-card class="box-card">
       <el-form :inline="true" ref="form" :model="queryMap" label-width="70px">
+        <el-form-item label="部门">
+          <el-select
+            clearable
+            @change="searchUser"
+            @clear="searchUser"
+            v-model="queryMap.departmentId"
+            placeholder="请选择所属部门"
+          >
+            <el-option
+              v-for="department in departments"
+              :key="department.id"
+              :label="department.name"
+              :value="department.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="用户名">
           <el-input
+            @keyup.enter.native="searchUser"
             style="width:180px;"
             @clear="searchUser"
             clearable
@@ -31,24 +48,15 @@
         </el-form-item>
         <el-form-item label="邮箱">
           <el-input
-            style="width:150px;"
+            @keyup.enter.native="searchUser"
+            style="width:160px;"
             clearable
             @clear="searchUser"
             v-model="queryMap.email"
             placeholder="请输入邮箱查询"
           ></el-input>
         </el-form-item>
-        <el-form-item label="部门">
-          <el-select  clearable
-            @clear="searchUser" v-model="queryMap.departmentId" placeholder="请选择所属部门">
-            <el-option
-              v-for="department in departments"
-              :key="department.id"
-              :label="department.name"
-              :value="department.id"
-            ></el-option>
-          </el-select>
-        </el-form-item>
+
         <!-- <el-form-item label="昵称">
           <el-input
             style="width:150px;"
@@ -58,12 +66,10 @@
             placeholder="请输入昵称查询"
           ></el-input>
         </el-form-item>-->
-        
 
         <el-form-item>
-          <el-button plain type="primary" @click="searchUser" icon="el-icon-search">查询</el-button>
+          <el-button type="primary" @click="searchUser" icon="el-icon-search">查询</el-button>
           <el-button
-            plain
             type="success"
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
@@ -190,7 +196,7 @@
             <el-form-item label="手机" prop="phoneNumber">
               <el-input v-model="addForm.phoneNumber"></el-input>
             </el-form-item>
-            <el-form-item prop="birth"  label="生日">
+            <el-form-item prop="birth" label="生日">
               <el-col :span="11">
                 <el-date-picker
                   type="date"
@@ -206,7 +212,12 @@
 
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addUser">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="addUser"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >确 定</el-button>
         </span>
       </el-dialog>
       <!-- 修改对话框 -->
@@ -291,7 +302,12 @@
 
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="updateUser">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="updateUser"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >确 定</el-button>
         </span>
       </el-dialog>
       <!-- 分配角色对话框 -->
@@ -308,7 +324,13 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="assignDialogVisible = false" class="el-icon-close">取消分配</el-button>
-          <el-button type="primary" @click="doAssignRoles" class="el-icon-check">确定分配</el-button>
+          <el-button
+            type="primary"
+            @click="doAssignRoles"
+            class="el-icon-check"
+            :loading="btnLoading"
+            :disabled="btnDisabled"
+          >确定分配</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -351,6 +373,8 @@ export default {
       }, 100);
     };
     return {
+      btnLoading: false,
+      btnDisabled: false,
       departments: [],
       loading: true,
       total: 0,
@@ -421,7 +445,6 @@ export default {
         spinner: "el-icon-loading",
         background: "rgba(0, 0, 0, 0.7)"
       });
-
       const { data: res } = await this.$http.get("user/" + id + "/roles");
       if (res.code == 200) {
         this.roles = res.data.roles;
@@ -437,6 +460,8 @@ export default {
     //确定分配角色
     async doAssignRoles() {
       this.assignDialogVisible = true;
+      this.btnLoading = true;
+      this.btnDisabled = true;
       const { data: res } = await this.$http.post(
         "user/" + this.uid + "/assignRoles",
         this.value
@@ -447,6 +472,8 @@ export default {
         this.$message.error("分配权限失败:" + res.msg);
       }
       this.assignDialogVisible = false;
+      this.btnLoading = false;
+      this.btnDisabled = false;
     },
     //加载用户列表
     async getUserList() {
@@ -493,6 +520,8 @@ export default {
         if (!valid) {
           return;
         } else {
+          this.btnLoading = true;
+          this.btnDisabled = true;
           const { data: res } = await this.$http.post("user/add", this.addForm);
           if (res.code == 200) {
             this.$message.success("用户添加成功");
@@ -502,6 +531,8 @@ export default {
             return this.$message.error("用户添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
+          this.btnLoading = false;
+          this.btnDisabled = false;
         }
       });
     },
@@ -511,7 +542,9 @@ export default {
         if (!valid) {
           return;
         } else {
-          const { data: res } = await this.$http.post(
+          this.btnLoading = true;
+          this.btnDisabled = true;
+          const { data: res } = await this.$http.put(
             "user/update/" + this.editForm.id,
             this.editForm
           );
@@ -528,6 +561,8 @@ export default {
           }
 
           this.editDialogVisible = false;
+          this.btnLoading = false;
+          this.btnDisabled = false;
         }
       });
     },
@@ -541,10 +576,10 @@ export default {
       const { data: res } = await this.$http.get("user/edit/" + id);
       if (res.code == 200) {
         this.editForm = res.data;
+        this.editDialogVisible = true;
       } else {
-        return this.$message.error("用户信息编辑失败" + res.msg);
+        return this.$message.error("用户信息编辑失败:" + res.msg);
       }
-      this.editDialogVisible = true;
     },
     //改变页码
     handleSizeChange(newSize) {

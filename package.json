@@ -1,5 +1,5 @@
 {
-  "name": "vue_permission",
+  "name": "Xinguan",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,6 +23,8 @@
     "@vue/cli-plugin-router": "^4.2.0",
     "@vue/cli-plugin-vuex": "^4.2.0",
     "@vue/cli-service": "^4.2.0",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2",
     "vue-cli-plugin-axios": "0.0.4",
     "vue-cli-plugin-element": "^1.0.1",
     "vue-template-compiler": "^2.6.11"

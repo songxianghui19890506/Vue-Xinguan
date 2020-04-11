@@ -18,7 +18,12 @@
           </el-col>
           <el-col :span="4">
             <div class="grid-content bg-purple-light">
-              <el-button type="primary" plain icon="el-icon-plus" style="margin-left:20px;" @click="openParentAdd">最高父级</el-button>
+              <el-button
+                type="primary"
+                icon="el-icon-plus"
+                style="margin-left:20px;"
+                @click="openParentAdd"
+              >父级</el-button>
             </div>
           </el-col>
         </el-row>
@@ -87,7 +92,7 @@
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addNode">确 定</el-button>
+        <el-button type="primary" @click="addNode" :loading="btnLoading" :disabled="btnDisabled">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 编辑节点弹出框 -->
@@ -137,7 +142,12 @@
       </span>
       <span slot="footer" class="dialog-footer">
         <el-button @click="editlogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateMenu">确 定</el-button>
+        <el-button
+          type="primary"
+          @click="updateMenu"
+          :loading="btnLoading"
+          :disabled="btnDisabled"
+        >确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -157,6 +167,8 @@ export default {
     const data = [];
 
     return {
+      btnLoading: false,
+      btnDisabled: false,
       loading: true,
       open: [], //展开节点
       filterText: "", //节点过滤文本
@@ -183,7 +195,7 @@ export default {
         disabled: [
           { required: true, message: "节点状态不能为空", trigger: "blur" }
         ],
-     
+
         orderNum: [
           { required: true, message: "排序不能为空", trigger: "blur" }
         ],
@@ -212,7 +224,9 @@ export default {
         if (!valid) {
           return;
         } else {
-          const { data: res } = await this.$http.post(
+          this.btnLoading = true;
+          this.btnDisabled = true;
+          const { data: res } = await this.$http.put(
             "menu/update/" + this.editForm.id,
             this.editForm
           );
@@ -224,6 +238,8 @@ export default {
             });
             this.editForm = {};
             this.editlogVisible = false;
+            this.btnLoading = false;
+            this.btnDisabled = false;
             this.getMenuTree();
           } else {
             return this.$message.error(res.msg);
@@ -238,7 +254,6 @@ export default {
       if (res.code == 200) {
         this.editForm = res.data;
         this.editlogVisible = true;
-       
       } else {
         return this.$message.error("节点编辑失败:" + res.msg);
       }
@@ -259,7 +274,7 @@ export default {
     },
     //加载菜单树
     async getMenuTree() {
-      const { data: res } = await this.$http.get("menu/menuTree");
+      const { data: res } = await this.$http.get("menu/tree");
       if (res.code == 200) {
         this.data = res.data.tree;
         this.open = res.data.open;
@@ -273,7 +288,7 @@ export default {
       this.pNode = data;
     },
     //添加最高父级节点
-     openParentAdd(data) {
+    openParentAdd(data) {
       this.addTitle = "添加第一父级";
       this.addDialogVisible = true;
       this.addForm.parentId = 0;
@@ -313,10 +328,14 @@ export default {
         if (!valid) {
           return;
         } else {
+          this.btnLoading = true;
+          this.btnDisabled = true;
           const { data: res } = await this.$http.post("menu/add", this.addForm);
           if (res.code == 200) {
             this.$message.success("节点添加成功");
             this.addDialogVisible = false;
+            this.btnLoading = false;
+            this.btnDisabled = false;
             this.getMenuTree();
           } else {
             this.$message.error("节点添加失败");
@@ -368,7 +387,7 @@ export default {
             >
               <i class="el-icon-plus"></i>&nbsp;增加
             </el-button>
-          
+
             <el-button
               size="mini"
               type="text"

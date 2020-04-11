@@ -16,6 +16,9 @@ import GobalMap from '../components/map/map.vue'
 import Swagger from '../components/doc/Swagger.vue'
 import Druid from '../components/doc/Druid.vue'
 import LoginLog from '../components/log/LoginLog.vue'
+import Message from '../components/message/Message.vue'
+import Logs from '../components/log/Logs.vue'
+import Consumers from '../components/product/Consumers.vue'
 
 Vue.use(VueRouter)
 
@@ -92,6 +95,20 @@ const routes = [
     {
       path: '/loginLog',
       component: LoginLog
+    },
+  
+    {
+      path: '/messages',
+      component: Message
+    },
+    {
+      path: '/logs',
+      component: Logs
+    },
+  
+    {
+      path: '/consumers',
+      component: Consumers
     },
   
     ]

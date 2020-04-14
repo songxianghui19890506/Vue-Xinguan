@@ -14,7 +14,7 @@
           <el-input
             clearable
             v-model="queryMap.name"
-            placeholder="请输入供应商查询"
+            placeholder="请输入来源查询"
             @clear="search"
             class="input-with-select"
           >
@@ -88,7 +88,7 @@
             label-width="100px"
             class="demo-ruleForm"
           >
-            <el-form-item label="供应商名称" prop="name">
+            <el-form-item label="来源 名称" prop="name">
               <el-input v-model="addRuleForm.name"></el-input>
             </el-form-item>
 
@@ -127,7 +127,7 @@
             label-width="100px"
             class="demo-ruleForm"
           >
-            <el-form-item label="供应商名称" prop="name">
+            <el-form-item label="来源 名称" prop="name">
               <el-input v-model="editRuleForm.name"></el-input>
             </el-form-item>
 

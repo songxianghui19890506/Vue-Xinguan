@@ -88,7 +88,7 @@ export default {
             "user/login?username=" +
               this.userLoginForm.username +
               "&password=" +
-              this.userLoginForm.password+"&imgCode="+this.userLoginForm.imgCode
+              this.userLoginForm.password
           );
           console.log(res);
           if (res.code == 200) {
@@ -98,7 +98,7 @@ export default {
               type: "success"
             });
             //保存token
-            sessionStorage.setItem("JWT_TOKEN", res.data);
+            localStorage.setItem("JWT_TOKEN", res.data);
             //跳转到home
             this.$router.push("/home");
           } else {
@@ -118,7 +118,6 @@ export default {
     }
   },
   created() {
-    this.changImgCode();
     const h = this.$createElement;
     this.$notify({
       title: "众志成城抗击疫情",

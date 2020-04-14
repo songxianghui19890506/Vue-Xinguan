@@ -1,4 +1,3 @@
-//menu.vue;
 <template>
   <div>
     <template v-for="item in this.menuList">

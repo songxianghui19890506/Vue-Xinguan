@@ -37,20 +37,21 @@
         </el-menu>
       </el-aside>
       <!--右边主体-->
-      <el-main v-loading="loading">
-        <router-view></router-view>
-      </el-main>
+    
+        <el-main v-loading="loading">
+          <router-view></router-view>
+        </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
-import Menu from "./menu.vue"; //引进菜单模板
+import Menu from "./Menu.vue"; //引进菜单模板
 
 export default {
   data() {
     return {
-      loading:true,
+      loading: true,
       activePath: "", //激活的路径
       isOpen: false,
       circleUrl: "", //用户头像
@@ -63,7 +64,7 @@ export default {
   methods: {
     //退出登入
     logout: function() {
-      window.sessionStorage.clear();
+      window.localStorage.clear();
       this.$router.push("/login");
     },
 
@@ -78,18 +79,18 @@ export default {
       const { data: res } = await this.$http.get("user/info");
       if (res.code !== 200) return this.$message.error("获取用户信息失败");
       this.circleUrl = res.data.avatar;
-      var urls=[];
+      var urls = [];
       res.data.menus.forEach((item, index, array) => {
         //执行代码
-        if(item!=null&&item!=""){
-           urls.push(item.url);
+        if (item != null && item != "") {
+          urls.push(item.url);
         }
       });
-      var m=urls.filter(s=>{
-        return s&&s.trim();
-      })
-      sessionStorage.setItem("urls",m);
-      sessionStorage.setItem("roles",res.data.roles);
+      var m = urls.filter(s => {
+        return s && s.trim();
+      });
+      sessionStorage.setItem("urls", m);
+      sessionStorage.setItem("roles", res.data.roles);
     },
     //菜单的伸缩
     toggleMenu() {
@@ -104,9 +105,9 @@ export default {
     //   this.activePath='/welcome';
     // }
     setTimeout(() => {
-          this.loading = false;
+      this.loading = false;
     }, 500);
-  }
+  },
 };
 </script>
 
@@ -114,7 +115,7 @@ export default {
 /* 为对应的路由跳转时设置动画效果 */
 
 .el-header {
-  background-color: #393D49;
+  background-color: #393d49;
   display: flex;
   justify-content: space-between;
   align-items: center;

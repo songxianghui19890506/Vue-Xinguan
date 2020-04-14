@@ -105,7 +105,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="add" :disabled="disabled" :loading="btnLoading">确 定</el-button>
+          <el-button type="primary" @click="add" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
 
@@ -142,7 +142,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="update" :disabled="disabled" :loading="btnLoading">确 定</el-button>
+          <el-button type="primary" @click="update" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>

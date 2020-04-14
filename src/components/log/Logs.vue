@@ -126,7 +126,7 @@ export default {
     async deleteFileOrDirectory() {
       var ids = this.sels.map(item => item.id).join(); //获取所有选中行的id组成的字符串，以逗号分隔
       var res = await this.$confirm(
-        "此操作将永久批量删除登入日志, 是否继续?",
+        "此操作将永久批量删除系统日志, 是否继续?",
         "提示",
         {
           confirmButtonText: "确定",
@@ -142,7 +142,7 @@ export default {
       if (res == "confirm") {
         const { data: res } = await this.$http.delete("log/batchDelete/" + ids);
         if (res.code == 200) {
-          this.$message.success("登入日志删除成功");
+          this.$message.success("系统日志删除成功");
           this.getLogList();
         } else {
           this.$message.error(res.msg);
@@ -158,7 +158,7 @@ export default {
       this.getLogList();
     },
 
-    //加载登入日志列表
+    //加载系统日志列表
     async getLogList() {
       const { data: res } = await this.$http.get("log/findLogList", {
         params: this.queryMap
@@ -170,10 +170,10 @@ export default {
         this.LogData = res.data.rows;
       }
     },
-    //删除登入日志
+    //删除系统日志
     async del(id) {
       var res = await this.$confirm(
-        "此操作将永久删除该登入日志, 是否继续?",
+        "此操作将永久删除该系统日志, 是否继续?",
         "提示",
         {
           confirmButtonText: "确定",
@@ -189,7 +189,7 @@ export default {
       if (res == "confirm") {
         const { data: res } = await this.$http.delete("log/delete/" + id);
         if (res.code == 200) {
-          this.$message.success("登入日志删除成功");
+          this.$message.success("系统日志删除成功");
           this.getLogList();
         } else {
           this.$message.error(res.msg);

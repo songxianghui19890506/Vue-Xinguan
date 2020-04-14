@@ -63,6 +63,7 @@
             <el-form-item label="父分类" prop="pid">
               <el-cascader
                 @change="selectParentChange"
+                @clear="clearParent"
                 :change-on-select="true"
                 :options="parentCategorys"
                 clearable
@@ -82,7 +83,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="add">确 定</el-button>
+          <el-button type="primary" @click="add" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
       <!-- 编辑弹出框 -->
@@ -103,7 +104,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="update">确 定</el-button>
+          <el-button type="primary" @click="update" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -114,6 +115,8 @@
 export default {
   data() {
     return {
+      btnLoading: false,
+      btnDisabled: false,
       loading:true,
       pKeys: [],
       addDialogVisible: false,
@@ -142,7 +145,7 @@ export default {
       }, //级联选择器配置项
       columns: [
         {
-          label: "用户组名",
+          label: "分类名称",
           prop: "name"
         },
         {
@@ -181,6 +184,8 @@ export default {
         if (!valid) {
           return;
         } else {
+          this.btnLoading=true;
+          this.btnDisabled=true;
           const { data: res } = await this.$http.put(
             "productCategory/update/" + this.editRuleForm.id,
             this.editRuleForm
@@ -195,7 +200,8 @@ export default {
           } else {
              this.$message.error("分类信息更新失败:"+res.msg);
           }
-
+           this.btnLoading=false;
+          this.btnDisabled=false;
           this.editDialogVisible = false;
         }
       });
@@ -245,6 +251,8 @@ export default {
       var len = this.pKeys.length;
       if (len > 0) {
         this.addRuleForm.pid = this.pKeys[len - 1];
+      }else{
+        this.addRuleForm.pid=0;
       }
     },
     //加载分类数据
@@ -273,6 +281,8 @@ export default {
         if (!valid) {
           return;
         } else {
+           this.btnLoading=true;
+          this.btnDisabled=true;
           const { data: res } = await this.$http.post(
             "productCategory/add",
             this.addRuleForm
@@ -284,6 +294,8 @@ export default {
             return this.$message.error("分类添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
+           this.btnLoading=false;
+          this.btnDisabled=false;
         }
       });
     },

@@ -122,13 +122,19 @@ const router = new VueRouter({
 })
 //路由导航守卫
 router.beforeEach((to, from, next) => {
-  if (to.path == '/login') return next();
-  const token = window.sessionStorage.getItem('JWT_TOKEN');
+  const token = window.localStorage.getItem('JWT_TOKEN');
+  if (to.path == '/login') {
+    if(!token){
+      return next();
+    }else{
+      next({path: '/home'})
+    }
+  }
   if (!token) {
     return next('/login');
   } else {
     //判断是否有访问该路径的权限
-    const urls = window.sessionStorage.getItem('urls');
+    // const urls = window.localStorage.getItem('urls');
     // if(urls.indexOf(to.path) > -1){
     //   //则包含该元素
     //   return next();

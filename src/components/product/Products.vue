@@ -10,7 +10,7 @@
     <!-- 物资列表卡片区 -->
     <el-card class="box-card">
       <el-row :gutter="6">
-         <el-col :span="5">
+        <el-col :span="5">
           <el-cascader
             :change-on-select="true"
             @change="selectChange"
@@ -30,9 +30,9 @@
             class="input-with-select"
           ></el-input>
         </el-col>
-       
+
         <el-col :span="6">
-           <el-button type="primary" icon="el-icon-search" @click="search">查找</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="search">查找</el-button>
           <el-button type="success" icon="el-icon-circle-plus-outline" @click="openAdd">添加</el-button>
         </el-col>
       </el-row>
@@ -65,45 +65,6 @@
             </template>
           </el-table-column>
           <el-table-column prop="unit" label="物资单位"></el-table-column>
-          <el-table-column prop="stock" label="物资库存">
-            <template slot-scope="scope">
-              <el-tag
-                type="success"
-                v-if="scope.row.stock>500"
-                size="mini"
-                closable
-                v-text="scope.row.stock+' '+scope.row.unit"
-              ></el-tag>
-              <el-tag
-                type="info"
-                v-else-if="scope.row.stock>250"
-                size="mini"
-                closable
-                v-text="scope.row.stock+' '+scope.row.unit"
-              ></el-tag>
-              <el-tag
-                type="warning"
-                v-else-if="scope.row.stock>100"
-                size="mini"
-                closable
-                v-text="scope.row.stock+' '+scope.row.unit"
-              ></el-tag>
-              <el-tag
-                type="warning"
-                v-else-if="scope.row.stock==0"
-                size="mini"
-                closable
-                v-text="'暂无库存'"
-              ></el-tag>
-              <el-tag
-                type="danger"
-                v-else
-                size="mini"
-                closable
-                v-text="scope.row.stock+' '+scope.row.unit"
-              ></el-tag>
-            </template>
-          </el-table-column>
           <el-table-column prop="remark" label="备注"></el-table-column>
           <el-table-column prop="createTime" label="创建时间"></el-table-column>
           <el-table-column label="操作">
@@ -205,7 +166,7 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="addDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="add">确 定</el-button>
+          <el-button type="primary" @click="add" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
         </span>
       </el-dialog>
 
@@ -244,10 +205,27 @@
                 <i class="el-icon-plus"></i>
               </el-upload>
             </el-form-item>
+            <el-row>
+              <el-col :span="12">
+                <el-form-item label="物资规格" prop="model">
+                  <el-input v-model="editRuleForm.model"></el-input>
+                </el-form-item>
+              </el-col>
 
-            <el-form-item label="物资规格" prop="model">
-              <el-input v-model="editRuleForm.model"></el-input>
-            </el-form-item>
+              <el-col :span="12">
+                <div class="grid-content bg-purple">
+                  <el-form-item label="分类" prop="categoryKeys">
+                    <el-cascader
+                      :options="catetorys"
+                      clearable
+                      filterable
+                      :props="selectProps"
+                      v-model="editRuleForm.categoryKeys"
+                    ></el-cascader>
+                  </el-form-item>
+                </div>
+              </el-col>
+            </el-row>
             <el-row>
               <el-col :span="12">
                 <div class="grid-content bg-purple">
@@ -268,7 +246,12 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="update">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="update"
+            :disabled="btnDisabled"
+            :loading="btnLoading"
+          >确 定</el-button>
         </span>
       </el-dialog>
       <!-- 图片预览 -->
@@ -283,9 +266,11 @@
 export default {
   data() {
     return {
+      btnLoading: false,
+      btnDisabled: false,
       loading: true,
       headerObject: {
-        Authorization: window.sessionStorage.getItem("JWT_TOKEN")
+        Authorization: window.localStorage.getItem("JWT_TOKEN")
       }, //图片上传请求头
       catetorys: [], //类别选择
       selectProps: {
@@ -337,13 +322,7 @@ export default {
         ]
       }, //添加验证
       imgFilesList: [],
-         categorykeys: [],
-      selectProps: {
-        expandTrigger: "hover",
-        value: "id",
-        label: "name",
-        children: "children"
-      }, //级联选择器配置项
+      categorykeys: [] //搜索类别
     };
   },
   methods: {
@@ -383,12 +362,16 @@ export default {
         }
       }
     },
-    //更新物资
+    /**
+     * 更新物资
+     */
     async update() {
       this.$refs.editRuleFormRef.validate(async valid => {
         if (!valid) {
           return;
         } else {
+          this.btnDisabled = true;
+          this.btnLoading = true;
           const { data: res } = await this.$http.put(
             "product/update/" + this.editRuleForm.id,
             this.editRuleForm
@@ -404,12 +387,15 @@ export default {
           } else {
             this.$message.error("物资信息更新失败:" + res.msg);
           }
-
           this.editDialogVisible = false;
+          this.btnDisabled = false;
+          this.btnLoading = false;
         }
       });
     },
-    //编辑
+    /**
+     * 编辑物资
+     */
     async edit(id) {
       const { data: res } = await this.$http.get("product/edit/" + id);
       if (res.code == 200) {
@@ -423,15 +409,24 @@ export default {
       } else {
         return this.$message.error("物资信息编辑失败" + res.msg);
       }
+      var array = [];
+      array.push(res.data.oneCategoryId);
+      array.push(res.data.twoCategoryId);
+      array.push(res.data.threeCategoryId);
+      this.editRuleForm.categoryKeys = array;
       this.editDialogVisible = true;
     },
-    //添加
+    /**
+     * 添加物资
+     */
     add() {
+      console.log(this.addRuleForm.categoryKeys);
       this.$refs.addRuleFormRef.validate(async valid => {
         if (!valid) {
           return;
         } else {
-          console.log(this.addRuleForm);
+          this.btnDisabled = true;
+          this.btnLoading = true;
           const { data: res } = await this.$http.post(
             "product/add",
             this.addRuleForm
@@ -444,10 +439,14 @@ export default {
             return this.$message.error("物资添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
+          this.btnDisabled = false;
+          this.btnLoading = false;
         }
       });
     },
-    //加载物资列表
+    /**
+     * 加载物资列表
+     */
     async getproductList() {
       const { data: res } = await this.$http.get("product/findProductList", {
         params: this.queryMap
@@ -459,7 +458,9 @@ export default {
         this.productData = res.data.rows;
       }
     },
-    //加载物资类别
+    /**
+     * 加载物资类别
+     */
     async getCatetorys() {
       const { data: res } = await this.$http.get(
         "productCategory/categoryTree"
@@ -511,7 +512,7 @@ export default {
     editHandleSuccess(response, file, fileList) {
       this.editRuleForm.imageUrl = response.msg;
     },
-     /**
+    /**
      * 加载物资类别
      */
     async getCatetorys() {
@@ -535,7 +536,7 @@ export default {
       str = str.substring(0, str.length - 1);
       this.queryMap.categorys = str;
       this.getproductList();
-    },
+    }
   },
   created() {
     this.getproductList();

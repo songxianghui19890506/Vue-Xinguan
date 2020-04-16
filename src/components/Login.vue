@@ -30,24 +30,43 @@
           prefix-icon="el-icon-suitcase-1"
         ></el-input>
       </el-form-item>
-    <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox>
+      <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
         <div style="float:right;">
           <el-button
-            type="primary"
-            class="el-icon-thumb"
+          type="primary" 
+            class="el-icon-mobile-phone"
             @click="handleSubmit"
             :loading="loading"
           >登录</el-button>
-          <el-button
-            type="primary"
-            class="el-icon-refresh"
-            style="background-color:#909399"
-            @click="resetForm"
-          >重置</el-button>
+          <el-button class="el-icon-refresh" @click="resetForm">重置</el-button>
         </div>
       </el-form-item>
     </el-form>
+
+    <el-dialog
+  title="提示"
+  :visible.sync="dialogVisible"
+  width="30%"
+  >
+  <span>《新冠-物资管理系统》 该项目后端采用SpringBoot，Shiro，通用Mapper开发API接口，
+    前端使用当今较为流行的Vue.js。
+  </span>
+  <p>一个可供初学者接触的前后端分离项目</p>
+  <p>项目开源：
+    <ul>
+    
+      <li>后端项目： <el-link href='https://github.com/zykzhangyukang/Xinguan'  type="primary"> 厂库链接地址</el-link></li>
+      <br>
+      <li>前端项目： <el-link href='https://github.com/zykzhangyukang/Vue-Xinguan' type="primary">    厂库链接地址</el-link></li>
+    </ul>
+  </p>
+  <p>项目不定期更新：因为我比较懒~，觉得不错的话，还望各位大佬给个Star哟~。</p>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">点个赞</el-button>
+    <el-button type="primary" @click="dialogVisible = false">去登入</el-button>
+  </span>
+</el-dialog>
   </div>
 </template>
 
@@ -55,11 +74,15 @@
 export default {
   data() {
     return {
-      imgCode:undefined,
+      dialogVisible:false,
+      imgCode: undefined,
       //表单用户登入数据
       loading: false,
-      userLoginForm: { username: "系统测试人员", password: "123456" ,imgCode:'',},
-      checked: false,
+      userLoginForm: {
+        username: "zhangyukang",
+        password: "zhangyukang",
+      },
+      checked: true,
 
       //验证规则
       loginRules: {
@@ -75,7 +98,6 @@ export default {
     };
   },
   methods: {
-
     //登入提交
     handleSubmit: function() {
       this.$refs.userLoginFormRef.validate(async valid => {
@@ -118,15 +140,6 @@ export default {
     }
   },
   created() {
-    const h = this.$createElement;
-    this.$notify({
-      title: "众志成城抗击疫情",
-      message: h(
-        "i",
-        { style: "color: #303030" },
-        "欢迎您访问基于SpringBoot+Vue开发的前后端分离系统，新冠-物资管理系统,Vue,SpringBoot,JWT,Shiro,通用Mapper"
-      )
-    });
   }
 };
 </script>

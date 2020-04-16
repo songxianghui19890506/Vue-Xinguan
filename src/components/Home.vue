@@ -28,7 +28,7 @@
           :collapse="isOpen"
           :router="true"
           :default-active="activePath"
-          background-color="#304156"
+          background-color="#303030"
           :collapse-transition="false"
           text-color="rgba(255,255,255,0.7)"
           unique-opened
@@ -37,7 +37,6 @@
         </el-menu>
       </el-aside>
       <!--右边主体-->
-    
         <el-main v-loading="loading">
           <router-view></router-view>
         </el-main>
@@ -62,22 +61,44 @@ export default {
     Menu
   },
   methods: {
-    //退出登入
-    logout: function() {
+    /**
+     * 
+     * 退出登入
+     */
+    async logout() {
+       var res = await this.$confirm(
+        "此操作将退出系统, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      ).catch(() => {
+        this.$message({
+          type: "info",
+          message: "已取消退出登入"
+        });
+      });
+      if (res == "confirm") {
       window.localStorage.clear();
       this.$router.push("/login");
+      }
     },
-
-    //加载菜单数据
+    /**
+      加载菜单数据
+     */
     async getMenuList() {
       const { data: res } = await this.$http.get("user/findMenu");
-      if (res.code !== 200) return this.$message.error("获取菜单失败");
+      if (res.code !== 200) return this.$message.error("获取菜单失败:"+res.msg);
       this.menuList = res.data;
     },
-    //用户信息
+    /**
+      获取用户信息
+     */
     async getUserInfo() {
       const { data: res } = await this.$http.get("user/info");
-      if (res.code !== 200) return this.$message.error("获取用户信息失败");
+      if (res.code !== 200) return this.$message.error("获取用户信息失败:"+res.msg);
       this.circleUrl = res.data.avatar;
       var urls = [];
       res.data.menus.forEach((item, index, array) => {
@@ -92,7 +113,9 @@ export default {
       sessionStorage.setItem("urls", m);
       sessionStorage.setItem("roles", res.data.roles);
     },
-    //菜单的伸缩
+    /**
+     * 菜单伸缩
+     */
     toggleMenu() {
       this.isOpen = !this.isOpen;
     }
@@ -115,7 +138,7 @@ export default {
 /* 为对应的路由跳转时设置动画效果 */
 
 .el-header {
-  background-color: #393d49;
+  background-color: #303030;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -125,7 +148,7 @@ export default {
   padding-left: 0px;
 }
 .el-aside {
-  background-color: #304156;
+  background-color: #303030;
 }
 .el-main {
   background-color: #eaedf1;
@@ -135,7 +158,7 @@ export default {
   height: 100% !important;
 }
 .toggle-btn {
-  background-color: #4a5064;
+  background-color: #660166;
   font-size: 10px;
   line-height: 24px;
   color: #fff;

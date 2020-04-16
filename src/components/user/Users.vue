@@ -467,9 +467,9 @@ export default {
         this.value
       );
       if (res.code == 200) {
-        this.$message.success("分配权限成功");
+        this.$message.success("分配角色成功");
       } else {
-        this.$message.error("分配权限失败:" + res.msg);
+        this.$message.error("分配角色成功:" + res.msg);
       }
       this.assignDialogVisible = false;
       this.btnLoading = false;

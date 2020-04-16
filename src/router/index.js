@@ -19,6 +19,7 @@ import LoginLog from '../components/log/LoginLog.vue'
 import Message from '../components/message/Message.vue'
 import Logs from '../components/log/Logs.vue'
 import Consumers from '../components/product/Consumers.vue'
+import Stocks from'../components/product/Stocks.vue'
 
 Vue.use(VueRouter)
 
@@ -109,6 +110,11 @@ const routes = [
     {
       path: '/consumers',
       component: Consumers
+    },
+  
+    {
+      path: '/stocks',
+      component: Stocks
     },
   
     ]

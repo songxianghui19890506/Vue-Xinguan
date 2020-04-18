@@ -4,7 +4,7 @@
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>欢迎</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row gutter="20">
+    <el-row :gutter="20">
       <el-col :span="12">
         <div class="grid-content bg-purple">
           <el-card class="box-card">

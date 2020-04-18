@@ -11,12 +11,12 @@
       <div class="block">
         <!-- 节点过滤 -->
         <el-row>
-          <el-col :span="20">
+          <el-col :span="16">
             <div class="grid-content bg-purple">
               <el-input placeholder="输入关键字进行过滤" v-model="filterText" clearable></el-input>
             </div>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
             <div class="grid-content bg-purple-light">
               <el-button
                 type="primary"
@@ -26,6 +26,15 @@
               >父级</el-button>
             </div>
           </el-col>
+           <el-col :span="2">
+                <el-button
+                type="danger"
+                style="margin-left:20px;"
+                icon="el-icon-download"
+               @click="downExcel"
+              >导出</el-button>
+           </el-col>
+    
         </el-row>
 
         <p>菜单权限树</p>
@@ -154,6 +163,7 @@
 </template>
 
 <script>
+import axios from "axios";
 let id = 1000;
 
 export default {
@@ -218,6 +228,33 @@ export default {
     }, 500);
   },
   methods: {
+
+    /**
+     * 加载菜单表格
+     */
+    downExcel() {
+      var $this = this;
+      const res = axios.request({
+          url: "/menu/excel",
+          method: "post",
+          responseType: "blob"
+        })
+        .then(res => {
+          if(res.headers['content-type']==='application/json'){
+            return $this.$message.error("Subject does not have permission [menu:export]");
+          }
+          const data = res.data;
+          let url = window.URL.createObjectURL(data); // 将二进制文件转化为可访问的url
+          var a = document.createElement("a");
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = "菜单列表.xls";
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+    },
+
+
     //更新菜单
     async updateMenu() {
       this.$refs.editFormRef.validate(async valid => {

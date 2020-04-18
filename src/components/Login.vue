@@ -30,6 +30,9 @@
           prefix-icon="el-icon-suitcase-1"
         ></el-input>
       </el-form-item>
+    
+  
+    
       <el-checkbox v-model="checked" class="rememberme">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
         <div style="float:right;">
@@ -43,8 +46,17 @@
         </div>
       </el-form-item>
     </el-form>
+    <!-- 验证码 -->
+      <Vcode
+      :imgs="[Img1, Img2,Img3,Img4,Img5,Img6,Img7]"
+      :show="isShow"
+      @success="success"
+      @close="close"
+      :canvasWidth="500"
+      :canvasHeight="350"
+    />
 
-    <el-dialog
+<el-dialog
   title="提示"
   :visible.sync="dialogVisible"
   width="30%"
@@ -71,16 +83,33 @@
 </template>
 
 <script>
+import Vcode from "vue-puzzle-vcode";
+import Img1 from '../assets/b.jpg';
+import Img2 from '../assets/c.jpg';
+import Img3 from '../assets/a.jpg';
+import Img4 from '../assets/d.jpg';
+import Img5 from '../assets/e.jpg';
+import Img6 from '../assets/f.jpg';
+import Img7 from '../assets/g.jpg';
+
 export default {
   data() {
     return {
+      Img1,
+      Img2,
+      Img3,
+      Img4,
+      Img5,
+      Img6,
+      Img7,
+      isShow:false,
       dialogVisible:false,
       imgCode: undefined,
       //表单用户登入数据
       loading: false,
       userLoginForm: {
-        username: "zhangyukang",
-        password: "zhangyukang",
+        username: "系统测试人员",
+        password: "123456",
       },
       checked: true,
 
@@ -97,14 +126,27 @@ export default {
       }
     };
   },
+  components:{
+      Vcode
+  },
   methods: {
     //登入提交
     handleSubmit: function() {
-      this.$refs.userLoginFormRef.validate(async valid => {
+      this.$refs.userLoginFormRef.validate( valid => {
         if (!valid) {
           return;
         } else {
-          this.loading = true;
+          this.isShow=true;
+        }
+      });
+    },
+    //重置表单
+    resetForm: function() {
+      this.$refs.userLoginFormRef.resetFields();
+    },
+    //验证成功
+    async success(){
+        this.loading = true;
           //发起登入请求
           const { data: res } = await this.$http.post(
             "user/login?username=" +
@@ -124,19 +166,18 @@ export default {
             //跳转到home
             this.$router.push("/home");
           } else {
+            this.isShow=false;
             this.$message.error({
               title: "登入失败",
               message: res.msg,
               type: "error"
             });
+
           }
           this.loading = false;
-        }
-      });
     },
-    //重置表单
-    resetForm: function() {
-      this.$refs.userLoginFormRef.resetFields();
+    close(){
+        this.isShow = false;
     }
   },
   created() {

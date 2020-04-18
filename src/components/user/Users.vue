@@ -27,29 +27,16 @@
         <el-form-item label="用户名">
           <el-input
             @keyup.enter.native="searchUser"
-            style="width:180px;"
             @clear="searchUser"
             clearable
             v-model="queryMap.username"
             placeholder="请输入用户名查询"
           ></el-input>
         </el-form-item>
-        <el-form-item label="性别">
-          <el-select
-            style="width:150px;"
-            clearable
-            v-model="queryMap.sex"
-            @clear="searchUser"
-            placeholder="请选择性别查询"
-          >
-            <el-option label="男" value="1"></el-option>
-            <el-option label="女" value="0"></el-option>
-          </el-select>
-        </el-form-item>
+
         <el-form-item label="邮箱">
           <el-input
             @keyup.enter.native="searchUser"
-            style="width:160px;"
             clearable
             @clear="searchUser"
             v-model="queryMap.email"
@@ -57,28 +44,41 @@
           ></el-input>
         </el-form-item>
 
-        <!-- <el-form-item label="昵称">
-          <el-input
-            style="width:150px;"
+        <el-form-item label="性别">
+          <el-radio v-model="queryMap.sex" label="1">男</el-radio>
+          <el-radio v-model="queryMap.sex" label="0">女</el-radio>
+          <el-radio v-model="queryMap.sex" label>全部</el-radio>
+        </el-form-item>
+
+        <el-form-item label="昵称">
+          <el-input clearable @clear="searchUser" v-model="queryMap.nickname" placeholder="请输入昵称查询"></el-input>
+        </el-form-item>
+        <!-- <el-form-item label="状态">
+          <el-select
             clearable
+            v-model="queryMap.isban"
             @clear="searchUser"
-            v-model="queryMap.nickname"
-            placeholder="请输入昵称查询"
-          ></el-input>
+            placeholder="请选择用户状态"
+          >
+            <el-option label="全部" value=""></el-option>
+            <el-option label="禁用" value="1"></el-option>
+            <el-option label="正常" value="0"></el-option>
+          </el-select>
         </el-form-item>-->
 
-        <el-form-item>
+        <el-form-item style="margin-left:50px;">
           <el-button type="primary" @click="searchUser" icon="el-icon-search">查询</el-button>
           <el-button
             type="success"
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
           >添加</el-button>
+          <el-button @click="downExcel" type="danger" icon="el-icon-download">导出</el-button>
         </el-form-item>
       </el-form>
 
       <!-- 表格区域 -->
-      <el-table v-loading="loading" :data="userList" border style="width: 100%;" height="457">
+      <el-table v-loading="loading" :data="userList" border style="width: 100%;" height="390">
         <!-- <el-table-column type="selection" width="40"></el-table-column> -->
         <el-table-column label="#" prop="id" width="50"></el-table-column>
         <el-table-column prop="username" label="用户名" width="110"></el-table-column>
@@ -127,7 +127,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryMap.pageNo"
-        :page-sizes="[6, 20, 30, 40]"
+        :page-sizes="[5, 10, 20, 30]"
         :page-size="queryMap.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -337,6 +337,7 @@
   </div>
 </template>
 <script>
+import axios from "axios";
 export default {
   data() {
     var checkEmail = (rule, value, callback) => {
@@ -385,7 +386,7 @@ export default {
       //查询对象
       queryMap: {
         pageNum: 1,
-        pageSize: 6,
+        pageSize: 5,
         username: "",
         sex: "",
         nickname: ""
@@ -437,6 +438,34 @@ export default {
     };
   },
   methods: {
+    /**
+     * 加载用户表格
+     */
+    downExcel() {
+      var $this = this;
+      const res = axios
+        .request({
+          url: "/user/excel",
+          method: "post",
+          responseType: "blob"
+        })
+        .then(res => {
+          if (res.headers["content-type"] === "application/json") {
+            return $this.$message.error(
+              "Subject does not have permission [user:export]"
+            );
+          }
+          const data = res.data;
+          let url = window.URL.createObjectURL(data); // 将二进制文件转化为可访问的url
+          var a = document.createElement("a");
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = "用户列表.xls";
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+    },
+
     //弹出用户分配角色
     async assignRoles(id) {
       const loading = this.$loading({
@@ -469,7 +498,7 @@ export default {
       if (res.code == 200) {
         this.$message.success("分配角色成功");
       } else {
-        this.$message.error("分配角色成功:" + res.msg);
+        this.$message.error("分配角色失败:" + res.msg);
       }
       this.assignDialogVisible = false;
       this.btnLoading = false;

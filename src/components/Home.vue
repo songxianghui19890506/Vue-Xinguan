@@ -138,7 +138,7 @@ export default {
 /* 为对应的路由跳转时设置动画效果 */
 
 .el-header {
-  background-color: #303030;
+  background-color: #2b2929;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -158,7 +158,7 @@ export default {
   height: 100% !important;
 }
 .toggle-btn {
-  background-color: #660166;
+  background-color: #1890ff;
   font-size: 10px;
   line-height: 24px;
   color: #fff;

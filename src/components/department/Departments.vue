@@ -1,5 +1,5 @@
 <template>
-  <div id="departments" >
+  <div id="departments">
     <!-- 面包导航 -->
     <el-breadcrumb separator="/" style="padding-left:10px;padding-bottom:10px;font-size:12px;">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
@@ -21,12 +21,15 @@
             <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
           </el-input>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="2">
           <el-button
             type="success"
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
-          >添加部门</el-button>
+          >添加</el-button>
+        </el-col>
+        <el-col :span="2">
+          <el-button type="danger" icon="el-icon-download" @click="downExcel">导出</el-button>
         </el-col>
       </el-row>
       <!-- 表格区域 -->
@@ -42,8 +45,8 @@
           <el-table-column prop="id" type="index" label="ID" width="50"></el-table-column>
           <el-table-column prop="phone" label="办公电话" width="180"></el-table-column>
           <el-table-column prop="name" label="系名" width="120"></el-table-column>
-           <el-table-column prop="createTime"  label="创建时间"></el-table-column>
-           <el-table-column prop="modifiedTime"  label="修改时间"></el-table-column>
+          <el-table-column prop="createTime" label="创建时间"></el-table-column>
+          <el-table-column prop="modifiedTime" label="修改时间"></el-table-column>
           <el-table-column prop="mgrName" label="系主任" width="140"></el-table-column>
           <el-table-column prop="address" label="地址"></el-table-column>
           <el-table-column label="操作">
@@ -142,7 +145,12 @@
         </span>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="update" :disabled="btnDisabled" :loading="btnLoading">确 定</el-button>
+          <el-button
+            type="primary"
+            @click="update"
+            :disabled="btnDisabled"
+            :loading="btnLoading"
+          >确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -150,6 +158,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     var checkPhone = (rule, value, callback) => {
@@ -170,9 +179,9 @@ export default {
       }, 100);
     };
     return {
-      btnLoading:false,
-      btnDisabled:false,
-      loading:true,
+      btnLoading: false,
+      btnDisabled: false,
+      loading: true,
       editDialogVisible: false,
       addDialogVisible: false, //添加弹框是否显示
       total: 0, //总共多少条数据
@@ -203,7 +212,35 @@ export default {
     };
   },
   methods: {
-     //搜索
+    /**
+     * 加载部门表格
+     */
+    downExcel() {
+      var $this = this;
+      const res = axios
+        .request({
+          url: "/department/excel",
+          method: "post",
+          responseType: "blob"
+        })
+        .then(res => {
+          if (res.headers["content-type"] === "application/json") {
+            return $this.$message.error(
+              "Subject does not have permission [department:export]"
+            );
+          }
+          const data = res.data;
+          let url = window.URL.createObjectURL(data); // 将二进制文件转化为可访问的url
+          var a = document.createElement("a");
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = "部门列表.xls";
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+    },
+
+    //搜索
     search() {
       this.queryMap.pageNum = 1;
       this.getDepartmentList();
@@ -242,8 +279,7 @@ export default {
         if (!valid) {
           return;
         } else {
-          this.btnLoading=true,
-          this.btnDisabled=true;
+          (this.btnLoading = true), (this.btnDisabled = true);
           const { data: res } = await this.$http.put(
             "department/update/" + this.editRuleForm.id,
             this.editRuleForm
@@ -256,8 +292,8 @@ export default {
             });
             this.editRuleForm = {};
             this.getDepartmentList();
-            this.btnDisabled=false;
-            this.btnLoading=false;
+            this.btnDisabled = false;
+            this.btnLoading = false;
           } else {
             this.$message.error("部门信息更新失败:" + res.msg);
           }
@@ -282,8 +318,7 @@ export default {
         if (!valid) {
           return;
         } else {
-           this.btnLoading=true,
-          this.btnDisabled=true;
+          (this.btnLoading = true), (this.btnDisabled = true);
           const { data: res } = await this.$http.post(
             "department/add",
             this.addRuleForm
@@ -296,8 +331,7 @@ export default {
             return this.$message.error("部门添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
-           this.btnLoading=false,
-          this.btnDisabled=false;
+          (this.btnLoading = false), (this.btnDisabled = false);
         }
       });
     },
@@ -349,8 +383,8 @@ export default {
   created() {
     this.getDepartmentList();
     this.getDeanList();
-       setTimeout(() => {
-          this.loading = false;
+    setTimeout(() => {
+      this.loading = false;
     }, 500);
   }
 };

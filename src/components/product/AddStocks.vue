@@ -37,10 +37,10 @@
               </el-form-item>
               <el-form-item label="入库类型" prop="type">
                 <el-radio-group v-model="addRuleForm.type">
-                  <el-radio label="1">捐赠</el-radio>
-                  <el-radio label="2">下拨</el-radio>
-                  <el-radio label="3">采购</el-radio>
-                  <el-radio label="4">借用</el-radio>
+                  <el-radio :label="1">捐赠</el-radio>
+                  <el-radio :label="2">下拨</el-radio>
+                  <el-radio :label="3">采购</el-radio>
+                  <el-radio :label="4">借用</el-radio>
                 </el-radio-group>
               </el-form-item>
               <el-form-item label="物资总类">
@@ -127,7 +127,7 @@
               :total="total"
             ></el-pagination>
             <!-- 抽屉 -->
-            <el-drawer size="50%" title="我是标题" :visible.sync="drawer" :with-header="false">
+            <el-drawer size="50%" title="入库明细" :visible.sync="drawer" :with-header="false">
               <span>
                 <el-table :data="products" border>
                   <el-table-column prop="name" label="名称" width="120px;"></el-table-column>
@@ -190,11 +190,11 @@ export default {
         type: [{ required: true, message: "请选中入库类型", trigger: "blur" }],
         remark: [
           { required: true, message: "请输入商品说明备注", trigger: "blur" },
-          { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
+          { min: 5, max: 20, message: "长度在 5 到 20 个字符", trigger: "blur" }
         ]
       }, //添加验证
       itemNum: 0,
-      addRuleForm: {},
+      addRuleForm: {type:1},
       suppliers: [],
       categorykeys: [],
       selectProps: {

@@ -10,7 +10,7 @@
     <el-card class="box-card">
       <!-- 上面工具栏 -->
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :span="10">
           <el-input
             clearable
             placeholder="请输入角色名查询"
@@ -21,13 +21,19 @@
             <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
           </el-input>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="2">
           <el-button
             type="success"
-            plain
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
-          >添加角色</el-button>
+          >添加</el-button>
+        </el-col>
+        <el-col :span="2">
+          <el-button
+            type="danger"
+            icon="el-icon-download"
+            @click="downExcel"
+          >导出</el-button>
         </el-col>
       </el-row>
       <!-- 表格区域 -->
@@ -150,6 +156,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   data() {
     return {
@@ -184,6 +191,32 @@ export default {
     };
   },
   methods: {
+
+      /**
+     * 加载菜单表格
+     */
+    downExcel() {
+      var $this = this;
+      const res = axios.request({
+          url: "/role/excel",
+          method: "post",
+          responseType: "blob"
+        })
+        .then(res => {
+          if(res.headers['content-type']==='application/json'){
+            return $this.$message.error("Subject does not have permission [role:export]");
+          }
+          const data = res.data;
+          let url = window.URL.createObjectURL(data); // 将二进制文件转化为可访问的url
+          var a = document.createElement("a");
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = "角色列表.xls";
+          a.click();
+          window.URL.revokeObjectURL(url);
+        });
+    },
+
     //获取选中的节点
     async authority() {
       this.btnDisabled = true;

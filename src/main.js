@@ -16,7 +16,7 @@ Vue.use(echarts)
 NProgress.configure({ease:'ease',speed:500});
 NProgress.configure({minimum:0.3});
 Vue.prototype.$http = axios
-axios.defaults.baseURL='http://localhost:8081/'
+axios.defaults.baseURL='http://www.localhost:8081/'
 axios.interceptors.request.use(config => {
     NProgress.start() // 设置加载进度条(开始..)
     config.headers.Authorization = window.localStorage.getItem('JWT_TOKEN');

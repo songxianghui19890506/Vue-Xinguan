@@ -24,7 +24,6 @@
         <el-col :span="8">
           <el-button
             type="warning"
-            plain
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
           >添加</el-button>
@@ -79,7 +78,7 @@
         :total="total"
       ></el-pagination>
       <!-- 系别添加弹出框 -->
-      <el-dialog title="添加类别" :visible.sync="addDialogVisible" width="50%" @close="closeAddDialog">
+      <el-dialog title="添加来源" :visible.sync="addDialogVisible" width="50%" @close="closeAddDialog">
         <span>
           <el-form
             :model="addRuleForm"
@@ -114,7 +113,7 @@
 
       <!-- 系别编辑弹出框 -->
       <el-dialog
-        title="更新类别"
+        title="更新来源"
         :visible.sync="editDialogVisible"
         width="50%"
         @close="closeEditDialog"
@@ -205,7 +204,7 @@ export default {
       deans: [], //所有系主任
       addRules: {
         name: [
-          { required: true, message: "请输入类别名称", trigger: "blur" },
+          { required: true, message: "请输入来源名称", trigger: "blur" },
           { min: 2, max: 10, message: "长度在 2 到 10 个字符", trigger: "blur" }
         ],
         address: [
@@ -231,7 +230,7 @@ export default {
       this.queryMap.pageNum = 1;
       this.getSupplierList();
     },
-    //删除类别
+    //删除来源
     async del(id) {
       var res = await this.$confirm(
         "此操作将永久删除该用户, 是否继续?",
@@ -250,7 +249,7 @@ export default {
       if (res == "confirm") {
         const { data: res } = await this.$http.delete("supplier/delete/" + id);
         if (res.code == 200) {
-          this.$message.success("类别删除成功");
+          this.$message.success("来源删除成功");
           this.getSupplierList();
         } else {
           this.$message.error(res.msg);
@@ -270,13 +269,13 @@ export default {
           if (res.code == 200) {
             this.$notify({
               title: "成功",
-              message: "类别信息更新",
+              message: "来源信息更新",
               type: "success"
             });
             this.editRuleForm = {};
             this.getSupplierList();
           } else {
-            this.$message.error("类别信息更新失败:" + res.msg);
+            this.$message.error("来源信息更新失败:" + res.msg);
           }
 
           this.editDialogVisible = false;
@@ -289,7 +288,7 @@ export default {
       if (res.code == 200) {
         this.editRuleForm = res.data;
       } else {
-        return this.$message.error("类别信息编辑失败" + res.msg);
+        return this.$message.error("来源信息编辑失败" + res.msg);
       }
       this.editDialogVisible = true;
     },
@@ -304,11 +303,11 @@ export default {
             this.addRuleForm
           );
           if (res.code == 200) {
-            this.$message.success("类别添加成功");
+            this.$message.success("来源添加成功");
             this.addRuleForm = {};
             this.getSupplierList();
           } else {
-            return this.$message.error("类别添加失败:" + res.msg);
+            return this.$message.error("来源添加失败:" + res.msg);
           }
           this.addDialogVisible = false;
         }

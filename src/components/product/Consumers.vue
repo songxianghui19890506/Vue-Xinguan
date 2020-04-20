@@ -24,7 +24,6 @@
         <el-col :span="8">
           <el-button
             type="warning"
-            plain
             icon="el-icon-circle-plus-outline"
             @click="addDialogVisible=true"
           >添加</el-button>

@@ -103,7 +103,7 @@ export default {
       Img6,
       Img7,
       isShow:false,
-      dialogVisible:false,
+      dialogVisible:true,
       imgCode: undefined,
       //表单用户登入数据
       loading: false,
@@ -163,8 +163,7 @@ export default {
             });
             //保存token
             localStorage.setItem("JWT_TOKEN", res.data);
-            //跳转到home
-            this.$router.push("/home");
+            this.getUserInfo();
           } else {
             this.isShow=false;
             this.$message.error({
@@ -175,6 +174,30 @@ export default {
 
           }
           this.loading = false;
+    },
+
+       /**
+      获取用户信息
+     */
+    async getUserInfo() {
+      const { data: res } = await this.$http.get("user/info");
+      if (res.code !== 200)
+        return this.$message.error("获取用户信息失败:" + res.msg);
+      var urls = [];
+      res.data.menus.forEach((item, index, array) => {
+        //执行代码
+        if (item != null && item != "") {
+          urls.push(item.url);
+        }
+      });
+      var m = urls.filter(s => {
+        return s && s.trim();
+      });
+      this.userInfo=res.data;
+      //保存用户
+      this.$store.commit('setUserInfo',res.data);
+      //跳转到home
+      this.$router.push("/home");
     },
     close(){
         this.isShow = false;
